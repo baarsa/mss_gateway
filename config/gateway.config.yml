@@ -1,0 +1,77 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  host: localhost
+apiEndpoints:
+  api:
+    host: localhost
+    paths: '/api/*'
+  auth:
+    host: localhost
+    paths: '/auth/*'
+  front:
+    host: localhost
+    paths: '/*'
+serviceEndpoints:
+  apiService:
+    url: ${API_URL}
+  authService:
+    url: ${AUTH_URL}
+  frontService:
+    url: ${FRONT_URL}
+policies:
+  - log
+  - proxy
+  - jwt
+  - request-transformer
+  - rewrite
+
+pipelines:
+  authPipeline:
+    apiEndpoints:
+      - auth
+    policies:
+      - rewrite:
+          condition:
+            name: regexpmatch
+            match: ^/[^/]+(/.+)$
+          action:
+              rewrite: $1
+      - proxy:
+          action:
+            serviceEndpoint: authService
+  apiPipeline:
+    apiEndpoints:
+      - api
+    policies:
+      - rewrite:
+            condition:
+              name: regexpmatch
+              match: ^/[^/]+(/.+)$
+            action:
+              rewrite: $1
+      - jwt:
+          - action:
+              secretOrPublicKey: ${JWT_SECRET}
+              checkCredentialExistence: false
+      - request-transformer:
+          - action:
+              body:
+                add:
+                  user: req.user
+      - proxy:
+          - action:
+              serviceEndpoint: apiService
+  frontPipeline:
+    apiEndpoints:
+      - front
+    policies:
+      - request-transformer:
+          - action:
+              body:
+                add:
+                  user: req.user
+      - proxy:
+          - action:
+              serviceEndpoint: frontService
