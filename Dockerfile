@@ -3,5 +3,5 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 RUN npm install --production
 COPY . .
-EXPOSE 8080
+EXPOSE ${PORT:-8001}
 CMD ["node", "server.js"]
