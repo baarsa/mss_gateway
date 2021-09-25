@@ -1,18 +1,14 @@
 http:
   port: ${PORT:-8001}
-  host: ${HOST:-localhost}
 admin:
   port: 9876
   host: localhost
 apiEndpoints:
   api:
-    host: localhost
     paths: '/api/*'
   auth:
-    host: localhost
     paths: '/auth/*'
   front:
-    host: localhost
     paths: '/*'
 serviceEndpoints:
   apiService:
