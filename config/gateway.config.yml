@@ -1,5 +1,6 @@
 http:
   port: ${PORT:-8001}
+  host: ${HOST:-localhost}
 admin:
   port: 9876
   host: localhost
