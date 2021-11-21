@@ -12,12 +12,13 @@ apiEndpoints:
     paths: '/*'
 serviceEndpoints:
   apiService:
-    url: ${API_URL}
+    url: 'http://mss-api:4000'
   authService:
-    url: ${AUTH_URL}
+    url: 'http://mss-auth:8080'
   frontService:
-    url: ${FRONT_URL}
+    url: 'http://mss-front:8080'
 policies:
+  - cors
   - log
   - proxy
   - jwt
@@ -29,6 +30,11 @@ pipelines:
     apiEndpoints:
       - auth
     policies:
+      - cors:
+          - action:
+              origin: 'http://localhost:17003'
+              credentials: true
+              methods: 'HEAD,PUT,PATCH,GET,POST,DELETE'
       - rewrite:
           condition:
             name: regexpmatch
@@ -38,10 +44,17 @@ pipelines:
       - proxy:
           action:
             serviceEndpoint: authService
+      - log:
+          - action:
+              message: ${req.method} ${req.originalUrl}
   apiPipeline:
     apiEndpoints:
       - api
     policies:
+      - cors:
+          - action:
+              origin: '*'
+              methods: 'HEAD,PUT,PATCH,GET,POST,DELETE'
       - rewrite:
             condition:
               name: regexpmatch
